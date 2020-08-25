@@ -7,28 +7,28 @@
     </div>
     <div
       class="timeline-post"
-      @click="load_detail"
-      data-toggle="collapse"
-      :href="'#detail'+id"
       aria-expanded="false"
       :aria-controls="'detail'+id"
       style="margin-bottom: 0;height: 6em;overflow:hidden; border-radius:0.5em; display: -webkit-flex;dispaly:flex-inline;justify-content:flex-start;"
+      @click="load_detail"
+      data-toggle="collapse"
+      :href="'#detail'+id"
     >
       <div class="post-media" style="width=100px;">
-        <a href="#">
+        <a href="#" @click.prevent="user_ref(userId)">
           <img :src="get_img_path(userId)" style="width:4em" />
         </a>
       </div>
 
       <div class="content" style="width=150px; flex-shrink:0">
         <h5 style="margin-top:-0.5em">
-          <a href="#">{{nickname}}</a>
+          <a href="#" @click="user_ref(userId)">{{nickname}}</a>
         </h5>
         <p class="text-muted" style="margin-top:-0.5em">
           <small>
-            {{time_arr[1]}}
+            {{easytime(time)[1]}}
             <br />
-            {{time_arr[0]}}
+            {{easytime(time)[0]}}
           </small>
         </p>
       </div>
@@ -42,9 +42,9 @@
           <small v-if="lastRepliedTime!==time">
             最新回复：{{lastRepliedNickname}}
             <br />
-            {{lastRepliedTime_arr[1]}}
+            {{easytime(lastRepliedTime)[1]}}
             <br />
-            {{lastRepliedTime_arr[0]}}
+            {{easytime(lastRepliedTime)[0]}}
           </small>
         </p>
       </div>
@@ -57,6 +57,7 @@
       style="overflow:auto"
       data-toggle="modal"
       :data-target="'#detailModal'+id"
+      @click="history(id)"
     >
       <!-- <div style="position:absolute; margin-left:30px; z-index:2">
         <p class="text-muted">单击查看详情</p>
@@ -69,7 +70,8 @@
         <p class="text-muted" style="margin-top:-20px; margin-left:-20em">
           <small>单击查看详情>></small>
         </p>
-        <p>{{content}}</p>
+        <!-- <p>{{content}}</p> -->
+        <div v-html="diy_content(content)" style="overflow:auto;width:370px;"></div>
       </div>
 
       <div
@@ -78,14 +80,16 @@
         <div
           v-for="reply in syn_replyList"
           :key="reply.updated"
-          style="width: 400px; height:100px; background-color:white !important; overflow:auto; margin-bottom:10px "
+          style="width: 500px; height:100px; background-color:white !important; overflow:auto; margin-bottom:10px "
         >
           <div class="card-body">
             <div
               style="position:absolute; margin-left:-1em; margin-top:-1em; background:#009688; height:2em; color:white; padding:0.4em; z-index:3"
             >
-              <h6 class="card-title">{{reply.nickname}}</h6>
-              <p class="card-subtitle mb-2 text-muted">回复：{{ reply_who(reply.replyId) }}</p>
+              <a href="#" @click.stop="user_ref(reply.userId)" style="color:white">
+                <h6 class="card-title">{{reply.nickname}}</h6>
+              </a>
+              <p class="card-subtitle mb-2 text-muted">回复：{{ reply_who(reply.replyId)[1] }}</p>
               <p class="text-muted" style="margin-top:-0.5em">
                 <small>
                   {{easytime(reply.updated)[1]}}
@@ -94,7 +98,11 @@
                 </small>
               </p>
             </div>
-            <p class="card-text" style="margin-left:6em">{{reply.content}}</p>
+            <!-- <p class="card-text" style="margin-left:6em">{{reply.content}}</p> -->
+            <div
+              v-html="diy_content(reply.content)"
+              style="overflow:auto;width:400px;margin-left:50px"
+            ></div>
           </div>
         </div>
       </div>
@@ -133,66 +141,74 @@
                   style="width=150px; display: -webkit-flex;dispaly:flex-inline;justify-content:space-around"
                 >
                   <div class="post-media" style="width=100px; margin-bottom:10px">
-                    <a href="#">
+                    <a href="#" @click="user_ref(userId)" data-dismiss="modal">
                       <img :src="get_img_path(userId)" style="width:4em" />
                     </a>
                   </div>
-                  <h5 style="margin:0.5em">
-                    <a href="#">{{nickname}}</a>
-                  </h5>
+                  <h5 style="margin:0.5em; color:rgb(0, 150, 136)">{{nickname}}</h5>
                   <p class="text-muted" style="margin:0.5em">
-                    <small>{{time_arr[1]}} &nbsp;{{time_arr[0]}}</small>
+                    <small>{{easytime(time)[1]}} &nbsp;{{easytime(time)[0]}}</small>
                   </p>
                 </div>
                 <div
                   style="width=150px; display: -webkit-flex;dispaly:flex-inline;justify-content:space-around"
                 >
                   <a
+                    href="#"
+                    class="fa fa-umbrella"
+                    aria-hidden="true"
+                    style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
+                    @click="umbrella(id)"
+                  ></a>
+
+                  <a
+                    href="#"
+                    class="fa fa-star"
+                    aria-hidden="true"
+                    style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
+                    @click="star(id)"
+                  ></a>
+
+                  <a
+                    href="#"
+                    class="fa fa-eye"
+                    aria-hidden="true"
+                    style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
+                    @click="()=>{host_only=!host_only}"
+                  ></a>
+
+                  <a
+                    href="#"
                     v-if="admin_id===userId"
                     class="fa fa-pencil"
                     aria-hidden="true"
                     style="font-size: 30px; color:rgb(0, 150, 136)"
                     @click="edit_my_post()"
                   ></a>
-                  <!-- <button
-                    class="btn btn-primary fa fa-reply"
-                    aria-hidden="true"
-                    style="width:40px; height:40px; margin:5px"
-                    @click="()=>{reply_name_content=nickname+'(原帖(';reply_id=id}"
-                  ></button>-->
                 </div>
               </div>
 
-              <textarea
-                v-if="text==='plain'"
-                rows="28"
-                cols="80"
-                placeholder="content"
-                v-model="content"
-                disabled="true"
-                style="resize: none"
-              ></textarea>
-
-              <span v-else class="content_html">{{content}}</span>
-
-              
-
-
+              <div v-html="diy_content(content)" style="overflow:auto; height:600px"></div>
             </div>
             <div
               style="grid-row-start:1;grid-column-start:2;grid-row-end:3;grid-column-end:3; overflow:auto;"
             >
               <div
-                v-for="reply in replyTree"
+                v-for="reply in replyDetail"
                 :key="reply.updated"
                 style="background-color:rgb(240,240,240) !important; margin-bottom:10px; margin-left:10px;display: -webkit-flex;dispaly:flex-inline; "
               >
                 <div style=" flex-shrink:0; margin-left:10px">
-                  <div style=" background:#009688; color:white; margin-top:10px">
-                    <h6>{{reply.nickname}}</h6>
-                  </div>
+                  <a href="#" @click="user_ref(reply.replyId)" data-dismiss="modal">
+                    <h5
+                      style="border-radius:0.3em; height:25px; background:#009688; color:white;"
+                    >{{reply.nickname}}</h5>
+                  </a>
 
-                  <div class="mb-2 text-muted">回复：楼主</div>
+                  <div v-if="!host_only||reply.replyId===0" class="mb-2 text-muted">回复：楼主</div>
+                  <div v-else class="mb-2 text-muted">
+                    <small>回复：{{reply_who(reply.replyId)[1]}}</small>
+                  </div>
                   <div class="text-muted" style="margin-top:-0.5em">
                     <small>
                       {{easytime(reply.updated)[1]}}
@@ -201,6 +217,7 @@
                     </small>
                   </div>
                   <a
+                    href="#"
                     v-if="admin_id===reply.userId"
                     class="fa fa-pencil"
                     aria-hidden="true"
@@ -220,36 +237,44 @@
                   @click.capture="()=>{reply_name_content=reply.nickname+'('+reply.content+')';reply_id=reply.id;type='reply'}"
                 >
                   <div style="margin-top:20px; margin-bottom:20px">
-                    <p class="card-text">{{reply.content}}</p>
+                    <div v-html="diy_content(reply.content)" style="overflow:auto;width:480px;"></div>
                   </div>
 
-                  <div style="background-color:rgb(220,220,220);width:480px">
-                    <p
-                      v-for="replyreply in reply['replyreply']"
-                      :key="replyreply.updated"
-                      @click.capture="()=>{reply_name_content=replyreply.nickname+'('+replyreply.content+')';reply_id=replyreply.id;type='reply'}"
-                    >
-                      <span
-                        style=" background:#009688; color:white; border-radius:0.3em;"
-                      >{{replyreply.nickname}}</span>回复
-                      <span
-                        style=" background:#009688; color:white;border-radius:0.3em;"
-                      >{{reply_who(replyreply.replyId)}}</span>
-                      {{replyreply.content}}
-                      <a
-                        v-if="admin_id===replyreply.userId"
-                        class="fa fa-pencil"
-                        aria-hidden="true"
-                        style="font-size: 15px; color:rgb(0, 150, 136)"
-                        @click="edit_mine(replyreply.content, replyreply.id)"
-                      ></a>
-                      <!-- <button
-                        class="btn btn-primary fa fa-reply"
-                        aria-hidden="true"
-                        style="height:25px; width:20px; margin:5px"
-                        @click="()=>{reply_name_content=replyreply.nickname+'('+replyreply.content+')';reply_id=replyreply.id}"
-                      ></button>-->
-                    </p>
+                  <div
+                    v-for="replyreply in reply['replyreply']"
+                    :key="replyreply.updated"
+                    @click.capture="()=>{reply_name_content=replyreply.nickname+'('+replyreply.content+')';reply_id=replyreply.id;type='reply'}"
+                    style="background-color:rgb(220,220,220);width:480px; margin-bottom:10px"
+                  >
+                    <div v-if="!host_only">
+                      <div style="margin-left:0">
+                        <a
+                          href="#"
+                          @click="user_ref(replyreply.userId)"
+                          data-dismiss="modal"
+                          style=" background:#009688; color:white;border-radius:0.3em;"
+                        >{{replyreply.nickname}}</a>
+                        回复
+                        <a
+                          href="#"
+                          @click="user_ref(reply_who(replyreply.replyId)[0])"
+                          data-dismiss="modal"
+                          style=" background:#009688; color:white;border-radius:0.3em;"
+                        >{{reply_who(replyreply.replyId)[1]}}</a>
+                        <small>{{easytime(replyreply.updated)[1]}} &nbsp;{{easytime(replyreply.updated)[0]}}</small>
+
+                        <a
+                          href="#"
+                          v-if="admin_id===replyreply.userId"
+                          class="fa fa-pencil"
+                          aria-hidden="true"
+                          style="font-size: 15px; color:rgb(0, 150, 136)"
+                          @click="edit_mine(replyreply.content, replyreply.id)"
+                        ></a>
+                      </div>
+
+                      <div v-html="diy_content(replyreply.content)" style="overflow:auto;"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -315,6 +340,7 @@
 
 <script>
 import axios from "axios";
+import showdown from "showdown";
 
 export default {
   name: "Message",
@@ -342,20 +368,15 @@ export default {
       editOri: "",
       editing_title: "",
       editing_content: "",
-      text:"rich",
+      text: "rich",
+      host_only: false,
     };
   },
   computed: {
-    time_arr() {
-      return this.easytime(this.time);
-    },
-    lastRepliedTime_arr() {
-      return this.easytime(this.lastRepliedTime);
-    },
     img_path() {
       return `../../img_rc/${(this.userId % 12) + 1}.png')`;
     },
-    replyTree() {
+    replyDetail() {
       function hostReplyId(user, all_list) {
         let direct_reply = user.replyId;
         if (direct_reply === 0) {
@@ -370,23 +391,33 @@ export default {
         return null;
       }
 
-      let ret = [];
-      for (let user of this.replyList) {
-        if (user.replyId === 0) {
-          user["replyreply"] = [];
-          ret.push(user);
-        }
-      }
-
-      for (let u of this.replyList) {
-        let u_hostId = hostReplyId(u, this.replyList);
-        for (let host of ret) {
-          if (host.id === u_hostId && u.id !== u_hostId) {
-            host["replyreply"].push(u);
+      if (!this.host_only) {
+        let ret = [];
+        for (let user of this.replyList) {
+          if (user.replyId === 0) {
+            user["replyreply"] = [];
+            ret.push(user);
           }
         }
+
+        for (let u of this.replyList) {
+          let u_hostId = hostReplyId(u, this.replyList);
+          for (let host of ret) {
+            if (host.id === u_hostId && u.id !== u_hostId) {
+              host["replyreply"].push(u);
+            }
+          }
+        }
+        return ret;
+      } else {
+        let ret = [];
+        for (let user of this.replyList) {
+          if (user.userId === this.userId) {
+            ret.push(user);
+          }
+        }
+        return ret;
       }
-      return ret;
     },
     syn_replyList() {
       return this.replyList;
@@ -418,7 +449,7 @@ export default {
       } else {
         for (let i = 0; i < this.replyList.length; i++) {
           if (this.replyList[i].id === id) {
-            return this.replyList[i].nickname;
+            return [this.replyList[i].userId, this.replyList[i].nickname];
           }
         }
         return "???";
@@ -506,6 +537,112 @@ export default {
           toastr.error("修改回复失败");
           /* eslint-enable */
         });
+    },
+    user_ref(id) {
+      this.$emit("user_ref", id);
+      console.log("user_ref -> user_ref", id);
+    },
+    diy_content(raw) {
+      let len = raw.length;
+      if (
+        raw.substring(0, 9) === "<my-code>" &&
+        raw.substring(len - 10, len) === "</my-code>"
+      ) {
+        return (
+          '<pre style="text-align:left">' +
+          raw.substring(9, len - 10) +
+          "</pre>"
+        );
+      } else if (
+        raw.substring(0, 10) === "<markdown>" &&
+        raw.substring(len - 11, len) === "</markdown>"
+      ) {
+        let converter = new showdown.Converter();
+        let html = converter.makeHtml(raw);
+        return html;
+      }
+
+      return raw;
+    },
+    star(post_id) {
+      let acookie = document.cookie.split("; ");
+      let all_stars = "";
+      for (var i = 0; i < acookie.length; i++) {
+        var arr = acookie[i].split("=");
+        if (arr[0] === "star") {
+          all_stars = arr[1];
+        }
+      }
+
+      all_stars = all_stars.split(",");
+
+      if (all_stars.indexOf("" + post_id) == -1) {
+        all_stars.unshift(post_id);
+                    /* eslint-disable */
+            toastr.success("收藏成功");
+            /* eslint-enable */
+      } else {
+        all_stars.splice(all_stars.indexOf("" + post_id), 1);
+                            /* eslint-disable */
+            toastr.warning("取消收藏");
+            /* eslint-enable */
+      }
+
+      all_stars = all_stars.join(",");
+
+      document.cookie = `star=${all_stars};expires=Sun, 31 Dec 2099 12:00:00 UTC`;
+    },
+    history(post_id) {
+      let acookie = document.cookie.split("; ");
+      let all_historys = "";
+      for (var i = 0; i < acookie.length; i++) {
+        var arr = acookie[i].split("=");
+        if (arr[0] === "history") {
+          all_historys = arr[1];
+        }
+      }
+
+      all_historys = all_historys.split(",");
+
+      if (all_historys.indexOf("" + post_id) == -1) {
+        all_historys.unshift(post_id);
+      }
+
+      if (all_historys.length > 30) {
+        all_historys.pop();
+      }
+
+      all_historys = all_historys.join(",");
+
+      document.cookie = `history=${all_historys};expires=Sun, 31 Dec 2099 12:00:00 UTC`;
+    },
+    umbrella(post_id) {
+      let acookie = document.cookie.split("; ");
+      let all_umbrellas = "";
+      for (var i = 0; i < acookie.length; i++) {
+        var arr = acookie[i].split("=");
+        if (arr[0] === "umbrella") {
+          all_umbrellas = arr[1];
+        }
+      }
+
+      all_umbrellas = all_umbrellas.split(",");
+
+      if (all_umbrellas.indexOf("" + post_id) == -1) {
+        all_umbrellas.unshift(post_id);
+                            /* eslint-disable */
+            toastr.warning("屏蔽成功");
+            /* eslint-enable */
+      } else {
+        all_umbrellas.splice(all_umbrellas.indexOf("" + post_id), 1);
+                                    /* eslint-disable */
+            toastr.success("取消屏蔽");
+            /* eslint-enable */
+      }
+
+      all_umbrellas = all_umbrellas.join(",");
+
+      document.cookie = `umbrella=${all_umbrellas};expires=Sun, 31 Dec 2099 12:00:00 UTC`;
     },
   },
 };
