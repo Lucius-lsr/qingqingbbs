@@ -13,6 +13,20 @@
 			integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
 			crossorigin="anonymous"
 		/>
+		<script
+			src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+			integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+			crossorigin="anonymous"
+		></script>
+		<script
+			src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+			integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+			crossorigin="anonymous"
+		></script>
+		<script type="text/javascript" src="js/bootstrap.js"></script>
+		<!-- Main Page-->
+		<link rel="stylesheet" type="text/css" href="css/main.css" />
+
 		<!--Fontawesome CDN-->
 		<link
 			rel="stylesheet"
@@ -29,24 +43,35 @@
 		/>
 
 		<!--toaster-->
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+		<link
+			href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+			rel="stylesheet"
+		/>
 		<script src="http://i.gtimg.cn/qzone/biz/gdt/lib/jquery/jquery-2.1.4.js?max_age=31536000"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-		<title><%= htmlWebpackPlugin.options.title %></title>
+		<link
+			rel="stylesheet"
+			type="text/css"
+			href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+		/>
 
+		<style>
+			div{
+				border-radius: 0.8em;
+			}
+			</style>
+
+		<title><%= htmlWebpackPlugin.options.title %></title>
 	</head>
 
-	<body>
-		<noscript>
-			<strong
-				>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
-				properly without JavaScript enabled. Please enable it to
-				continue.</strong
-			>
-		</noscript>
+	<body class="app sidebar-mini">
+		<header class="app-header">
+			<a class="app-header__logo" href="index.html">清华论坛</a>
+		</header>
 
 		<div id="app"></div>
+
 		<!-- built files will be auto injected -->
 	</body>
 </html>

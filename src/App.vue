@@ -1,92 +1,58 @@
 <template>
   <div id="app">
-    <Admin v-on:login_success="login" v-if="!admin"/>
-    <!-- <div class="container" v-if="!admin">
-      <div class="d-flex justify-content-center h-100">
-        <div class="card">
-          <div class="card-header">
-            <h3>{{title}}</h3>
-            <div class="d-flex justify-content-end social_icon">
-              <span>
-                <i class="fab fa-facebook-square"></i>
-              </span>
-              <span>
-                <i class="fab fa-google-plus-square"></i>
-              </span>
-              <span>
-                <i class="fab fa-twitter-square"></i>
-              </span>
-            </div>
-          </div>
-          <div class="card-body">
-            <form @submit.prevent="submitinfo">
-              <div class="input-group form-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i class="fas fa-user"></i>
-                  </span>
-                </div>
-                <input type="text" class="form-control" v-model="user" placeholder="用户名" />
-              </div>
-              <div class="input-group form-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">
-                    <i class="fas fa-key"></i>
-                  </span>
-                </div>
-                <input type="password" class="form-control" v-model="password" placeholder="密码" />
-              </div>
-              <div class="row align-items-center remember">
-                <input type="checkbox" />Remember Me
-              </div>
-              <div class="form-group">
-                <input type="submit" value="登录" class="btn float-right login_btn" />
-              </div>
-            </form>
-          </div>
-          <div class="card-footer">
-            <div class="d-flex justify-content-center links">
-              Don't have an account?
-              <a href="#">Sign Up</a>
-            </div>
-            <div class="d-flex justify-content-center">
-              <a href="#">Forgot your password?</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <HelloWorld msg="Welcome to Your Vue.js App" v-else />
+    <Admin v-on:login_success="login" v-if="!admin" />
+    <Page
+      v-on:logout="logout"
+      v-bind:nickname="nickname"
+      v-bind:username="username"
+      v-bind:token="jwt"
+      v-bind:admin_id="admin_id"
+      v-else
+    />
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
-// import axios from "axios";
+import Page from "./components/Page.vue";
 import Admin from "./components/Admin.vue";
 
 export default {
   name: "App",
   components: {
     Admin,
-    HelloWorld,
+    Page,
   },
   data() {
     return {
       admin: false,
-      jwt: ""
+      jwt: "",
+      username: "",
+      nickname: "",
+      admin_id:-1,
     };
   },
-  created() {
-
-  },
+  created() {},
   methods: {
-    login(e){
-      this.admin=true
-      this.jwt = e
-    }
+    login(e) {
+      console.log("login -> e", e)
+      this.admin = true;
+      console.log("login -> this.admin", this.admin)
+      this.jwt = e["jwt"];
+      this.username = e["username"];
+      this.nickname = e["nickname"];
+      this.admin_id=e["id"];
+    },
 
+    logout() {
+      var date = new Date();
+      date.setTime(date.getTime() - 10000);
+      document.cookie = "jwt=v; expires=" + date.toGMTString();
+      this.jwt = "";
+      this.admin = false;
+      /* eslint-disable */
+      toastr.warning("再见，" + this.nickname);
+      /* eslint-enable */
+    },
   },
 };
 

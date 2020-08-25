@@ -1,9 +1,9 @@
 <template>
   <div class="container">
     <div class="d-flex justify-content-center h-100">
-      <div class="card">
+      <div class="card" style="position: absolute; left: 0; right:0;top:0;bottom:0;margin:auto;">
         <div class="card-header">
-          <h3>{{title}}</h3>
+          <h3>登录</h3>
           <div class="d-flex justify-content-end social_icon">
             <span>
               <i class="fab fa-facebook-square"></i>
@@ -24,7 +24,7 @@
                   <i class="fas fa-user"></i>
                 </span>
               </div>
-              <input type="text" class="form-control" v-model="user" placeholder="用户名" />
+              <input type="text" class="form-control" v-model="username" placeholder="用户名" />
             </div>
             <div class="input-group form-group">
               <div class="input-group-prepend">
@@ -34,21 +34,17 @@
               </div>
               <input type="password" class="form-control" v-model="password" placeholder="密码" />
             </div>
-            <div class="row align-items-center remember">
+            <!-- <div class="row align-items-center remember">
               <input type="checkbox" />Remember Me
-            </div>
+            </div>-->
             <div class="form-group">
-              <input type="submit" value="登录" class="btn float-right login_btn" />
+              <input type="submit" value="登录" class="btn float-right login_btn" style="color:white" />
             </div>
           </form>
         </div>
         <div class="card-footer">
-          <div class="d-flex justify-content-center links">
-            Don't have an account?
-            <a href="#">Sign Up</a>
-          </div>
           <div class="d-flex justify-content-center">
-            <a href="#">Forgot your password?</a>
+            <a href="#">欢迎登录清华论坛！</a>
           </div>
         </div>
       </div>
@@ -63,10 +59,12 @@ export default {
   name: "Admin",
   data() {
     return {
-      user: "",
+      id: -1,
+      username: "",
       password: "",
       jwt: "",
       nickname: "",
+      created: "",
     };
   },
   created() {
@@ -84,24 +82,33 @@ export default {
       .get("/api/v1/user")
       .then((res) => {
         this.jwt = jwt;
-        console.log(res);
+        this.username = res.data["username"];
+        this.nickname = res.data["nickname"];
+        this.id = res.data["id"];
         /* eslint-disable */
-        toastr.success("快捷登录成功");
+        toastr.success("自动登录成功，欢迎您，" + this.nickname);
         /* eslint-enable */
         this.login();
       })
       .catch(() => {
         /* eslint-disable */
-        toastr.warning("登录信息已失效，请重新登录");
+        if (this.jwt !== "") {
+          toastr.warning("登录信息已失效，请重新登录");
+        }
         /* eslint-enable */
       });
   },
   methods: {
     login() {
-      this.$emit("login_success", this.jwt);
+      this.$emit("login_success", {
+        jwt: this.jwt,
+        nickname: this.nickname,
+        username: this.username,
+        id: this.id,
+      });
     },
     submitinfo() {
-      let data = { username: this.user, password: this.password };
+      let data = { username: this.username, password: this.password };
       axios
         .patch("/api/v1/login", data)
         .then((res) => {
@@ -109,7 +116,7 @@ export default {
           this.nickname = res.data["nickname"];
           document.cookie = `jwt=${this.jwt};expires=Sun, 31 Dec 2099 12:00:00 UTC`;
           /* eslint-disable */
-          toastr.success("登录成功");
+          toastr.success("登录成功，欢迎您，" + this.nickname);
           /* eslint-enable */
           this.login();
         })
