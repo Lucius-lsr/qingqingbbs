@@ -79,7 +79,7 @@
       >
         <div
           v-for="reply in syn_replyList"
-          :key="reply.updated"
+          :key="reply.id"
           style="width: 500px; height:100px; background-color:white !important; overflow:auto; margin-bottom:10px "
         >
           <div class="card-body">
@@ -146,7 +146,14 @@
                       <img :src="get_img_path(userId)" style="width:4em" />
                     </a>
                   </div>
-                  <h5 style="margin:0.5em; color:rgb(0, 150, 136)">{{nickname}}</h5>
+                  <h5>
+                    <a
+                      href="#"
+                      @click="user_ref(userId)"
+                      data-dismiss="modal"
+                      style="margin:0.5em; color:rgb(0, 150, 136)"
+                    >{{nickname}}</a>
+                  </h5>
                   <p class="text-muted" style="margin:0.5em">
                     <small>{{easytime(time)[1]}} &nbsp;{{easytime(time)[0]}}</small>
                   </p>
@@ -210,7 +217,7 @@
             >
               <div
                 v-for="reply in replyDetailInPage"
-                :key="reply.updated"
+                :key="reply.id"
                 style="background-color:rgb(240,240,240) !important; margin-bottom:10px; margin-left:10px;display: -webkit-flex;dispaly:flex-inline; "
               >
                 <div style=" flex-shrink:0; margin-left:10px">
@@ -272,7 +279,7 @@
 
                   <div
                     v-for="replyreply in reply['replyreply']"
-                    :key="replyreply.updated"
+                    :key="replyreply.id"
                     @click.capture="()=>{reply_name_content=replyreply.nickname+'('+replyreply.content+')';reply_id=replyreply.id;type='reply'}"
                     style="background-color:rgb(220,220,220);width:480px; margin-bottom:10px"
                   >
@@ -558,6 +565,12 @@ export default {
     },
     send_reply() {
       let data = null;
+      if (this.reply_content === "") {
+        /* eslint-disable */
+        toastr.warning("回复不能为空");
+        /* eslint-enable */
+      }
+
       if (this.reply_id === this.id) {
         data = { content: this.reply_content };
       } else {
@@ -648,6 +661,12 @@ export default {
         /#img熊猫#/g,
         '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/6e/panda_thumb.gif">'
       );
+
+      //公式支持
+      console.log(raw)
+      raw = raw.replace(/<eqa>/g,'<img src="http://latex.codecogs.com/gif.latex?');
+      console.log(raw)
+      raw = raw.replace(/<\/eqa>/g,'" />');
 
       //再匹配特殊文本
       let len = raw.length;

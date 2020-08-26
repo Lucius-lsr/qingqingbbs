@@ -171,7 +171,7 @@
 
               <Message
                 v-for="message in displayed_message_umbrella"
-                :key="message.updated"
+                :key="message.id"
                 v-bind:nickname="message.nickname"
                 v-bind:title="message.title"
                 v-bind:content="message.content"
@@ -346,7 +346,6 @@ export default {
     },
     change_focus(e) {
       this.focus = e;
-      console.log("change_focus -> this.focus", this.focus);
     },
     publish_message() {
       if (this.title === "" || this.publish === "") {

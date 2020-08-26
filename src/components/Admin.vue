@@ -52,7 +52,7 @@
         </div>
         <div class="card-footer">
           <div class="d-flex justify-content-center">
-            <p style=" color:white">欢迎来到QingQing论坛！</p>
+            <p style=" color:white">欢迎来到清软论坛！</p>
           </div>
         </div>
       </div>
@@ -101,10 +101,7 @@ export default {
       })
       .catch(() => {
         /* eslint-disable */
-        toastr.warning("???");
-        console.log("created -> this.jwt", this.jwt)
         if (this.jwt !== "") {
-          
           toastr.warning("登录信息已失效，请重新登录");
         }
         /* eslint-enable */
