@@ -89,99 +89,64 @@
                 style="margin-bottom: 5px;display: -webkit-flex;dispaly:flex-inline;justify-content:space-between"
               >
                 <ul class="pagination">
-                  <li class="page-item">
-                    <a class="page-link" @click="change_page(page-3)" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;&laquo;</span>
-                    </a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" @click="change_page(page-1)" aria-label="Previous">
-                      <span aria-hidden="true">&laquo;</span>
-                    </a>
-                  </li>
-                  <li class="page-item">
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1)"
-                      style="color:green; font-weight:bold"
-                      v-if="page===page_button1"
-                    >{{page_button1}}</a>
-                    <a class="page-link" @click="change_page(page_button1)" v-else>{{page_button1}}</a>
-                  </li>
-                  <li class="page-item">
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+1)"
-                      style="color:green; font-weight:bold"
-                      v-if="page===page_button1+1"
-                    >{{page_button1+1}}</a>
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+1)"
-                      v-else
-                    >{{page_button1+1}}</a>
-                  </li>
-                  <li class="page-item">
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+2)"
-                      style="color:green; font-weight:bold"
-                      v-if="page===page_button1+2"
-                    >{{page_button1+2}}</a>
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+2)"
-                      v-else
-                    >{{page_button1+2}}</a>
-                  </li>
-                  <li class="page-item">
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+3)"
-                      style="color:green; font-weight:bold"
-                      v-if="page===page_button1+3"
-                    >{{page_button1+3}}</a>
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+3)"
-                      v-else
-                    >{{page_button1+3}}</a>
-                  </li>
-                  <li class="page-item">
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+4)"
-                      style="color:green; font-weight:bold"
-                      v-if="page===page_button1+4"
-                    >{{page_button1+4}}</a>
-                    <a
-                      class="page-link"
-                      @click="change_page(page_button1+4)"
-                      v-else
-                    >{{page_button1+4}}</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" @click="change_page(page+1)" aria-label="Next">
-                      <span aria-hidden="true">&raquo;</span>
-                    </a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" @click="change_page(page+3)" aria-label="Next">
-                      <span aria-hidden="true">&raquo;&raquo;</span>
-                    </a>
-                  </li>
+                  <div>
+                    <li class="page-item">
+                      <a class="page-link" @click="change_page(page-5)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                      </a>
+                    </li>
+                  </div>
+
+                  <div>
+                    <li class="page-item">
+                      <a class="page-link" @click="change_page(page-1)" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                  </div>
+
+                  <div v-for="index in 10" :key="index">
+                    <li class="page-item active" v-if="page===page_button1+index-1">
+                      <a
+                        class="page-link"
+                        @click="change_page(page_button1+index-1)"
+                      >{{page_button1+index-1}}</a>
+                    </li>
+                    <li v-else>
+                      <a
+                        class="page-link"
+                        @click="change_page(page_button1+index-1)"
+                      >{{page_button1+index-1}}</a>
+                    </li>
+                  </div>
+
+                  <div>
+                    <li class="page-item">
+                      <a class="page-link" @click="change_page(page+1)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </div>
+                  <div>
+                    <li class="page-item">
+                      <a class="page-link" @click="change_page(page+5)" aria-label="Next">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                      </a>
+                    </li>
+                  </div>
                 </ul>
                 <div class="btn-group" role="group" style="height:40px">
                   <button
                     id="btnGroupDrop1"
                     type="button"
-                    class="btn btn-secondary dropdown-toggle"
+                    class="btn btn-primary dropdown-toggle"
                     data-toggle="dropdown"
                     aria-haspopup="true"
                     aria-expanded="false"
                   >排序方式</button>
                   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                     <a
+                      href="#"
                       class="dropdown-item"
                       @click="()=>{sort='modify';get_message()}"
                       style="color:green"
@@ -189,6 +154,7 @@
                     >按修改时间</a>
                     <a class="dropdown-item" @click="()=>{sort='modify';get_message()}" v-else>修改时间</a>
                     <a
+                      href="#"
                       class="dropdown-item"
                       @click="()=>{sort='reply';get_message()}"
                       style="color:green"
@@ -451,7 +417,7 @@ export default {
               }
             }
           }
-          this.show_umb=false
+          this.show_umb = false;
           this.displayed_message = star_posts;
         })
         .catch(() => {
@@ -489,7 +455,7 @@ export default {
               }
             }
           }
-this.show_umb=false
+          this.show_umb = false;
           this.displayed_message = history_posts;
         })
         .catch(() => {
@@ -527,7 +493,7 @@ this.show_umb=false
               }
             }
           }
-          this.show_umb=true
+          this.show_umb = true;
           this.displayed_message = umbrella_posts;
         })
         .catch(() => {
@@ -542,9 +508,8 @@ this.show_umb=false
       return Math.max(this.page - 2, 1);
     },
     displayed_message_umbrella() {
-
-      if(this.show_umb){
-        return this.displayed_message
+      if (this.show_umb) {
+        return this.displayed_message;
       }
 
       let acookie = document.cookie.split("; ");
@@ -556,15 +521,14 @@ this.show_umb=false
         }
       }
       all_umbrellas = all_umbrellas.split(",");
-      let ret = []
-      for(let to_dis of this.displayed_message){
-        if(all_umbrellas.indexOf("" + to_dis.id) === -1){
-          ret.push(to_dis)
+      let ret = [];
+      for (let to_dis of this.displayed_message) {
+        if (all_umbrellas.indexOf("" + to_dis.id) === -1) {
+          ret.push(to_dis);
         }
       }
 
-      return ret
-
+      return ret;
     },
   },
   created() {
@@ -588,5 +552,11 @@ li {
 }
 a {
   color: #42b983;
+}
+
+ nav > ul > div > li {
+  margin: 0 0;
+  width:40px;
+  font-weight: bold;
 }
 </style>

@@ -34,9 +34,7 @@ export default {
   created() {},
   methods: {
     login(e) {
-      console.log("login -> e", e)
       this.admin = true;
-      console.log("login -> this.admin", this.admin)
       this.jwt = e["jwt"];
       this.username = e["username"];
       this.nickname = e["nickname"];
@@ -56,57 +54,6 @@ export default {
   },
 };
 
-// import Vue from 'vue'
-// var admin = new Vue({
-//   data: {
-//     message: 'Hello Vue!'
-//   }
-// }).$mount('#admin')
-
-// let local_token=false
-
-// // funtion() login
-// if(!local_token){
-//   //加载登录界面
-
-//   //登录提交后如果收到token，再调用本函数
-// }
-// else{
-//   //提交token
-//   //申请个人信息
-//   //申请帖子列表
-//   //加载以上信息
-// }
-
-// // function publish
-// {
-
-// }
-
-// // funtion() detail
-// {
-
-// }
-
-// // function reply
-// {
-
-// }
-
-// // function edit
-// {
-
-// }
-
-// const axios = require('axios')
-
-// axios.get('/api/v1/hello')
-//   .then(function (response) {
-//     console.log(response);
-//   })
-//   .catch(function (error) {
-//     console.log(error);
-//   });
 </script>
 
 <style>

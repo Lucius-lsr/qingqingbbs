@@ -3,17 +3,25 @@
     <div class="d-flex justify-content-center h-100">
       <div class="card" style="position: absolute; left: 0; right:0;top:0;bottom:0;margin:auto;">
         <div class="card-header">
-          <h3>登录</h3>
+          <h3>Welcome!</h3>
           <div class="d-flex justify-content-end social_icon">
-            <span>
-              <i class="fab fa-facebook-square"></i>
+            <!-- <span>
+              <i class="fab fa-html5"></i>
             </span>
             <span>
-              <i class="fab fa-google-plus-square"></i>
-            </span>
-            <span>
-              <i class="fab fa-twitter-square"></i>
-            </span>
+              <i class="fab fa-chrome"></i>
+            </span>-->
+            <a href="https://twitter.com/Lucius_lsr" class="fa fa-twitter-square" target="_blank"></a>
+            <a
+              href="https://www.facebook.com/profile.php?id=100033049942286"
+              class="fa fa-facebook-square"
+              target="_blank"
+            ></a>
+            <a
+              href="https://github.com/Lucius-lsr/qingqingbbs"
+              class="fab fa-github"
+              target="_blank"
+            ></a>
           </div>
         </div>
         <div class="card-body">
@@ -44,7 +52,7 @@
         </div>
         <div class="card-footer">
           <div class="d-flex justify-content-center">
-            <a href="#">欢迎登录清华论坛！</a>
+            <p style=" color:white">欢迎来到QingQing论坛！</p>
           </div>
         </div>
       </div>
@@ -68,7 +76,8 @@ export default {
     };
   },
   created() {
-    let acookie = document.cookie.split(";");
+    let acookie = document.cookie.split("; ");
+
     let jwt = null;
     for (var i = 0; i < acookie.length; i++) {
       var arr = acookie[i].split("=");
@@ -92,7 +101,10 @@ export default {
       })
       .catch(() => {
         /* eslint-disable */
+        toastr.warning("???");
+        console.log("created -> this.jwt", this.jwt)
         if (this.jwt !== "") {
+          
           toastr.warning("登录信息已失效，请重新登录");
         }
         /* eslint-enable */
@@ -146,6 +158,13 @@ li {
   margin: 0 10px;
 }
 a {
-  color: #42b983;
+  color: #009688;
+  font-size: 60px;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+body {
+  background-color: aqua;
 }
 </style>

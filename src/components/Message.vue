@@ -99,6 +99,7 @@
               </p>
             </div>
             <!-- <p class="card-text" style="margin-left:6em">{{reply.content}}</p> -->
+
             <div
               v-html="diy_content(reply.content)"
               style="overflow:auto;width:400px;margin-left:50px"
@@ -159,6 +160,7 @@
                     aria-hidden="true"
                     style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
                     @click="umbrella(id)"
+                    v-bind:title="'屏蔽'"
                   ></a>
 
                   <a
@@ -167,6 +169,7 @@
                     aria-hidden="true"
                     style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
                     @click="star(id)"
+                    v-bind:title="'收藏'"
                   ></a>
 
                   <a
@@ -174,7 +177,17 @@
                     class="fa fa-eye"
                     aria-hidden="true"
                     style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
+                    @click="format_raw=!format_raw"
+                    v-bind:title="'原始内容'"
+                  ></a>
+
+                  <a
+                    href="#"
+                    class="fa fa-user-circle-o"
+                    aria-hidden="true"
+                    style="font-size: 30px; color:rgb(0, 150, 136);margin-right:20px"
                     @click="()=>{host_only=!host_only}"
+                    v-bind:title="'只看楼主'"
                   ></a>
 
                   <a
@@ -184,29 +197,40 @@
                     aria-hidden="true"
                     style="font-size: 30px; color:rgb(0, 150, 136)"
                     @click="edit_my_post()"
+                    v-bind:title="'修改原帖'"
                   ></a>
                 </div>
               </div>
 
-              <div v-html="diy_content(content)" style="overflow:auto; height:600px"></div>
+              <div v-if="format_raw" style="overflow:auto; height:600px">{{content}}</div>
+              <div v-else v-html="diy_content(content)" style="overflow:auto; height:600px"></div>
             </div>
             <div
               style="grid-row-start:1;grid-column-start:2;grid-row-end:3;grid-column-end:3; overflow:auto;"
             >
               <div
-                v-for="reply in replyDetail"
+                v-for="reply in replyDetailInPage"
                 :key="reply.updated"
                 style="background-color:rgb(240,240,240) !important; margin-bottom:10px; margin-left:10px;display: -webkit-flex;dispaly:flex-inline; "
               >
                 <div style=" flex-shrink:0; margin-left:10px">
-                  <a href="#" @click="user_ref(reply.replyId)" data-dismiss="modal">
-                    <h5
-                      style="border-radius:0.3em; height:25px; background:#009688; color:white;"
-                    >{{reply.nickname}}</h5>
-                  </a>
+                  <h5 style="border-radius:0.3em; height:25px; background:#009688;">
+                    <a
+                      href="#"
+                      @click="user_ref(reply.userId)"
+                      data-dismiss="modal"
+                      style=" color:white;"
+                    >{{reply.nickname}}</a>
+                  </h5>
 
-                  <div v-if="!host_only||reply.replyId===0" class="mb-2 text-muted">回复：楼主</div>
-                  <div v-else class="mb-2 text-muted">
+                  <div
+                    v-if="!host_only||reply.replyId===0"
+                    class="mb-2 text-muted"
+                    style="margin-top:-0.5em"
+                  >
+                    <small>回复：楼主</small>
+                  </div>
+                  <div v-else class="mb-2 text-muted" style="margin-top:-0.5em">
                     <small>回复：{{reply_who(reply.replyId)[1]}}</small>
                   </div>
                   <div class="text-muted" style="margin-top:-0.5em">
@@ -223,6 +247,7 @@
                     aria-hidden="true"
                     style="font-size: 15px; color:rgb(0, 150, 136)"
                     @click="edit_mine(reply.content, reply.id)"
+                    v-bind:title="'修改回复'"
                   ></a>
                   <!-- <button
                     class="btn btn-primary fa fa-reply"
@@ -237,7 +262,12 @@
                   @click.capture="()=>{reply_name_content=reply.nickname+'('+reply.content+')';reply_id=reply.id;type='reply'}"
                 >
                   <div style="margin-top:20px; margin-bottom:20px">
-                    <div v-html="diy_content(reply.content)" style="overflow:auto;width:480px;"></div>
+                    <div v-if="format_raw" style="overflow:auto;width:480px;">{{reply.content}}</div>
+                    <div
+                      v-else
+                      v-html="diy_content(reply.content)"
+                      style="overflow:auto;width:480px;"
+                    ></div>
                   </div>
 
                   <div
@@ -270,47 +300,103 @@
                           aria-hidden="true"
                           style="font-size: 15px; color:rgb(0, 150, 136)"
                           @click="edit_mine(replyreply.content, replyreply.id)"
+                          v-bind:title="'修改回复'"
                         ></a>
                       </div>
-
-                      <div v-html="diy_content(replyreply.content)" style="overflow:auto;"></div>
+                      <div v-if="format_raw" style="overflow:auto;">{{replyreply.content}}</div>
+                      <div v-else v-html="diy_content(replyreply.content)" style="overflow:auto;"></div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div
-              v-if="type==='reply'"
-              style="grid-row-start:3;grid-column-start:2;grid-row-end:4;grid-column-end:3;"
-            >
+            <div style="grid-row-start:3;grid-column-start:2;grid-row-end:4;grid-column-end:3;">
+              <div
+                style="display: -webkit-flex;dispaly:flex-inline; height:38px; justify-content:space-between; margin-top:10px"
+              >
+                <ul class="pagination" style="margin-left: 10px">
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      @click="change_page(page-1)"
+                      aria-label="Previous"
+                      style="  margin: 0 0;width:40px;font-weight: bold;"
+                    >
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+
+                  <div
+                    v-for="index in Math.ceil(replyDetail.length/10)"
+                    :key="index"
+                    style="margin: 0 0;width:40px;font-weight: bold;"
+                  >
+                    <li class="page-item active" v-if="page===page_button1+index-1">
+                      <a
+                        class="page-link"
+                        @click="change_page(page_button1+index-1)"
+                      >{{page_button1+index-1}}</a>
+                    </li>
+                    <li v-else>
+                      <a
+                        class="page-link"
+                        @click="change_page(page_button1+index-1)"
+                      >{{page_button1+index-1}}</a>
+                    </li>
+                  </div>
+
+                  <li class="page-item">
+                    <a
+                      class="page-link"
+                      @click="change_page(page+1)"
+                      aria-label="Next"
+                      style="margin: 0 0;width:40px;font-weight: bold;"
+                    >
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                </ul>
+                <button
+                  v-if="type==='reply'"
+                  type="button"
+                  class="btn btn-primary"
+                  @click="send_reply"
+                >回复</button>
+                <button
+                  v-else-if="type==='edit_post'"
+                  type="button"
+                  class="btn btn-primary"
+                  @click="send_edit_post"
+                >修改</button>
+                <button v-else type="button" class="btn btn-primary" @click="send_edit">修改</button>
+              </div>
               <textarea
+                v-if="type==='reply'"
                 rows="8"
                 cols="80"
                 v-bind:placeholder="'回复:'+reply_name_content"
                 v-model="reply_content"
                 style="resize: none; margin-top:10px; margin-left:10px"
               ></textarea>
-              <button type="button" class="btn btn-primary" @click="send_reply">回复</button>
-            </div>
 
-            <div v-else>
-              <div
-                v-if="type==='edit_post'"
-                style="grid-row-start:3;grid-column-start:2;grid-row-end:4;grid-column-end:3;"
-              >
-                <textarea
-                  rows="1"
-                  cols="80"
-                  v-model="editing_title"
-                  style="resize: none; margin-top:10px; margin-left:10px"
-                ></textarea>
-                <textarea
-                  rows="8"
-                  cols="80"
-                  v-model="editing_content"
-                  style="resize: none; margin-top:10px; margin-left:10px"
-                ></textarea>
-                <button type="button" class="btn btn-primary" @click="send_edit_post">修改</button>
+              <div v-else-if="type==='edit_post'">
+                <div
+                  v-if="type==='edit_post'"
+                  style="grid-row-start:3;grid-column-start:2;grid-row-end:4;grid-column-end:3;"
+                >
+                  <textarea
+                    rows="1"
+                    cols="80"
+                    v-model="editing_title"
+                    style="resize: none; margin-top:10px; margin-left:10px"
+                  ></textarea>
+                  <textarea
+                    rows="6"
+                    cols="80"
+                    v-model="editing_content"
+                    style="resize: none; margin-top:10px; margin-left:10px"
+                  ></textarea>
+                </div>
               </div>
 
               <div
@@ -323,7 +409,6 @@
                   v-model="editOri"
                   style="resize: none; margin-top:10px; margin-left:10px"
                 ></textarea>
-                <button type="button" class="btn btn-primary" @click="send_edit">修改</button>
               </div>
             </div>
           </div>
@@ -364,12 +449,14 @@ export default {
       reply_name_content: this.nickname + "（原帖）",
       reply_id: this.id,
       type: "reply",
+      page: 1,
       editId: -1,
       editOri: "",
       editing_title: "",
       editing_content: "",
       text: "rich",
       host_only: false,
+      format_raw: false,
     };
   },
   computed: {
@@ -391,15 +478,15 @@ export default {
         return null;
       }
 
+      let ret = [];
+
       if (!this.host_only) {
-        let ret = [];
         for (let user of this.replyList) {
           if (user.replyId === 0) {
             user["replyreply"] = [];
             ret.push(user);
           }
         }
-
         for (let u of this.replyList) {
           let u_hostId = hostReplyId(u, this.replyList);
           for (let host of ret) {
@@ -408,19 +495,26 @@ export default {
             }
           }
         }
-        return ret;
       } else {
-        let ret = [];
         for (let user of this.replyList) {
           if (user.userId === this.userId) {
             ret.push(user);
           }
         }
-        return ret;
       }
+
+      // handle page
+      return ret;
     },
+    replyDetailInPage() {
+      return this.replyDetail.slice((this.page - 1) * 10, this.page * 10);
+    },
+
     syn_replyList() {
       return this.replyList;
+    },
+    page_button1() {
+      return Math.max(this.page - 1, 1);
     },
   },
   methods: {
@@ -443,9 +537,16 @@ export default {
         })
         .catch(() => {});
     },
+    change_page(p) {
+      let number = this.replyDetail.length;
+      let max_page = Math.ceil(number / 10);
+      if (p >= 1 && p <= max_page) {
+        this.page = p;
+      }
+    },
     reply_who(id) {
       if (id === 0) {
-        return this.nickname;
+        return [this.userId, this.nickname];
       } else {
         for (let i = 0; i < this.replyList.length; i++) {
           if (this.replyList[i].id === id) {
@@ -464,7 +565,6 @@ export default {
       }
 
       axios.defaults.headers.common["Authorization"] = this.token;
-      console.log("send_reply -> data", data);
       axios
         .post(`/api/v1/post/${this.id}/reply`, data)
         .then((res) => {
@@ -475,9 +575,7 @@ export default {
             this.load_detail();
           }
         })
-        .catch((e) => {
-          console.log("send_reply -> e", e);
-
+        .catch(() => {
           /* eslint-disable */
           toastr.error("回复失败");
           /* eslint-enable */
@@ -504,16 +602,13 @@ export default {
             this.content = this.editing_content;
           }
         })
-        .catch((e) => {
-          console.log("send_reply -> e", e);
-
+        .catch(() => {
           /* eslint-disable */
           toastr.error("修改主贴失败");
           /* eslint-enable */
         });
     },
     edit_mine(content, id) {
-      console.log("!");
       this.type = "edit";
       this.editId = id;
       this.editOri = content;
@@ -530,9 +625,7 @@ export default {
             this.load_detail();
           }
         })
-        .catch((e) => {
-          console.log("send_reply -> e", e);
-
+        .catch(() => {
           /* eslint-disable */
           toastr.error("修改回复失败");
           /* eslint-enable */
@@ -540,9 +633,23 @@ export default {
     },
     user_ref(id) {
       this.$emit("user_ref", id);
-      console.log("user_ref -> user_ref", id);
     },
     diy_content(raw) {
+      // 先找自定义表情
+      raw = raw.replace(
+        /#img草泥马#/g,
+        '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/7a/shenshou_thumb.gif">'
+      );
+      raw = raw.replace(
+        /#img神马#/g,
+        '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/60/horse2_thumb.gif">'
+      );
+      raw = raw.replace(
+        /#img熊猫#/g,
+        '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/6e/panda_thumb.gif">'
+      );
+
+      //再匹配特殊文本
       let len = raw.length;
       if (
         raw.substring(0, 9) === "<my-code>" &&
@@ -578,14 +685,14 @@ export default {
 
       if (all_stars.indexOf("" + post_id) == -1) {
         all_stars.unshift(post_id);
-                    /* eslint-disable */
-            toastr.success("收藏成功");
-            /* eslint-enable */
+        /* eslint-disable */
+        toastr.success("收藏成功");
+        /* eslint-enable */
       } else {
         all_stars.splice(all_stars.indexOf("" + post_id), 1);
-                            /* eslint-disable */
-            toastr.warning("取消收藏");
-            /* eslint-enable */
+        /* eslint-disable */
+        toastr.warning("取消收藏");
+        /* eslint-enable */
       }
 
       all_stars = all_stars.join(",");
@@ -630,14 +737,14 @@ export default {
 
       if (all_umbrellas.indexOf("" + post_id) == -1) {
         all_umbrellas.unshift(post_id);
-                            /* eslint-disable */
-            toastr.warning("屏蔽成功");
-            /* eslint-enable */
+        /* eslint-disable */
+        toastr.warning("屏蔽成功");
+        /* eslint-enable */
       } else {
         all_umbrellas.splice(all_umbrellas.indexOf("" + post_id), 1);
-                                    /* eslint-disable */
-            toastr.success("取消屏蔽");
-            /* eslint-enable */
+        /* eslint-disable */
+        toastr.success("取消屏蔽");
+        /* eslint-enable */
       }
 
       all_umbrellas = all_umbrellas.join(",");
