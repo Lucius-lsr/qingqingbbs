@@ -1,7 +1,7 @@
 <template>
   <div style="margin-bottom: 20px">
     <div
-      style="position:absolute; margin-left:10em; margin-top:-0.6em; background:#009688; height:2em; border-radius:0.3em; color:white; padding:0.4em"
+      style="position:absolute; margin-left:10em; margin-top:-0.6em; background:#009688; height:2em; border-radius:0.3em; color:white; padding:0.4em; overflow:hidden"
     >
       <h5>{{title}}</h5>
     </div>
@@ -102,7 +102,7 @@
 
             <div
               v-html="diy_content(reply.content)"
-              style="overflow:auto;width:400px;margin-left:50px"
+              style="overflow:auto;width:400px;margin-left:100px"
             ></div>
           </div>
         </div>
