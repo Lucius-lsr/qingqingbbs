@@ -85,13 +85,17 @@
           <div class="tab-content">
             <div class="tab-pane active" id="user-timeline">
               <nav
-                aria-label="Page navigation example"
-                style="margin-bottom: 5px;display: -webkit-flex;dispaly:flex-inline;justify-content:space-between"
+                aria-label="Page navigation"
+                style="display: -webkit-flex;dispaly:flex-inline;justify-content:space-between"
               >
                 <ul class="pagination">
                   <div>
                     <li class="page-item">
-                      <a class="page-link" @click="change_page(page-5)" aria-label="Previous">
+                      <a
+                        class="page-link"
+                        @click="change_page(Math.max(1,page-10))"
+                        aria-label="Previous"
+                      >
                         <span aria-hidden="true">&laquo;&laquo;</span>
                       </a>
                     </li>
@@ -129,42 +133,69 @@
                   </div>
                   <div>
                     <li class="page-item">
-                      <a class="page-link" @click="change_page(page+5)" aria-label="Next">
+                      <a class="page-link" @click="change_page(page+10)" aria-label="Next">
                         <span aria-hidden="true">&raquo;&raquo;</span>
                       </a>
                     </li>
                   </div>
                 </ul>
-                <div class="btn-group" role="group" style="height:40px">
-                  <button
-                    id="btnGroupDrop1"
-                    type="button"
-                    class="btn btn-primary dropdown-toggle"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >排序方式</button>
-                  <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                    <a
-                      href="#"
-                      class="dropdown-item"
-                      @click="()=>{sort='modify';get_message()}"
-                      style="color:green"
-                      v-if="sort==='modify'"
-                    >按修改时间</a>
-                    <a class="dropdown-item" @click="()=>{sort='modify';get_message()}" v-else>修改时间</a>
-                    <a
-                      href="#"
-                      class="dropdown-item"
-                      @click="()=>{sort='reply';get_message()}"
-                      style="color:green"
-                      v-if="sort==='reply'"
-                    >按修改/最新回复时间</a>
-                    <a
-                      class="dropdown-item"
-                      @click="()=>{sort='reply';get_message()}"
-                      v-else
-                    >修改/回复时间</a>
+                <div style="margin-top:-10px;min-width:350px">
+                  <li class="app-search">
+                    <div>
+                      <input
+                        class="app-search__input"
+                        type="search"
+                        placeholder="搜索昵称"
+                        v-model="search_target"
+                      />
+                      <button
+                        class="app-search__button dropdown-toggle"
+                        id="searchButton"
+                        type="button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        @click="load_search"
+                      >
+                        <i class="fa fa-search"></i>
+                      </button>
+
+                      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="searchButton">
+                        <a
+                          v-for="name in search_results"
+                          :key="name[0]"
+                          href="#"
+                          class="dropdown-item"
+                          @click="message_of_id=name[0];page=1;get_message()"
+                        >{{name[1]}}</a>
+                      </div>
+                    </div>
+                  </li>
+
+                  <div class="btn-group" role="group" style="height:40px">
+                    <button
+                      id="sortDrop"
+                      type="button"
+                      class="btn btn-primary dropdown-toggle"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <span v-if="sort==='modify'">最新修改</span>
+                      <span v-else>最新回复</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu" aria-labelledby="sortDrop">
+                      <a
+                        href="#"
+                        class="dropdown-item"
+                        @click="()=>{sort='modify';get_message()}"
+                      >最新修改</a>
+                      <a
+                        href="#"
+                        class="dropdown-item"
+                        @click="()=>{sort='reply';get_message()}"
+                      >最新回复</a>
+                    </div>
                   </div>
                 </div>
               </nav>
@@ -241,23 +272,36 @@
       aria-hidden="true"
     >
       <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content" style="width:800px">
           <div class="modal-header">
-            <h5 class="modal-title" id="publishModalLabel">个人信息</h5>
+            <h5 class="modal-title" id="publishModalLabel">发布帖子</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
 
           <div class="modal-body">
-            <textarea rows="1" cols="50" placeholder="请输入标题" v-model="title" style="resize: none"></textarea>
-            <textarea
-              rows="15"
-              cols="50"
-              placeholder="请输入您要发布的内容"
-              v-model="publish"
-              style="resize: none"
-            ></textarea>
+            <div style="display: -webkit-flex;dispaly:flex-inline;">
+              <div>
+                <textarea
+                  rows="1"
+                  cols="50"
+                  placeholder="请输入标题"
+                  v-model="title"
+                  style="resize: none"
+                ></textarea>
+                <textarea
+                  rows="15"
+                  cols="50"
+                  placeholder="请输入您要发布的内容"
+                  v-model="publish"
+                  style="resize: none"
+                ></textarea>
+              </div>
+              <div style="overflow:auto;background-color:#eee; flex-shrink:0;margin-left:10px">
+                <div v-html="diy_content(publish)" style="width:400px; height:350px; overflow:auto"></div>
+              </div>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -277,6 +321,8 @@
 
 <script>
 import axios from "axios";
+import showdown from "showdown";
+import showdownKatex from "showdown-katex";
 import Message from "./Message";
 
 export default {
@@ -300,6 +346,8 @@ export default {
       focus: -1,
       message_of_id: -1,
       show_umb: false,
+      search_target: "",
+      search_results: [],
     };
   },
   methods: {
@@ -369,21 +417,6 @@ export default {
         .catch(() => {
           /* eslint-disable */
           toastr.error("发布失败");
-          /* eslint-enable */
-        });
-    },
-    someone_message() {
-      axios.defaults.headers.common["Authorization"] = this.token;
-      axios
-        .get("/api/v1/post", {
-          params: { page: this.page, orderByReply: this.sort === "reply" },
-        })
-        .then((res) => {
-          this.displayed_message = res.data["posts"];
-        })
-        .catch(() => {
-          /* eslint-disable */
-          toastr.warning("服务器有问题");
           /* eslint-enable */
         });
     },
@@ -501,6 +534,85 @@ export default {
           /* eslint-enable */
         });
     },
+    load_search() {
+      let name_key = this.search_target;
+      let results = [];
+
+      for (let id = 1; id < 105; id++) {
+        axios
+          .get("/api/v1/user/" + id)
+          .then((res) => {
+            if (res.data["nickname"].indexOf(name_key) !== -1 && name_key) {
+              results.push([id, res.data["nickname"]]);
+              // console.log(res.data["nickname"])
+            }
+          })
+          .catch((e) => {
+            console.log("load_search -> e", e);
+            this.search_results = results;
+          });
+      }
+    },
+    diy_content(raw) {
+      // 先找自定义表情
+      function code2emoji(code) {
+        // the code should within the range of [0,400]
+        if (code < 317) {
+          code = 56320 + code;
+        } else {
+          code = code - 317 + 56832;
+        }
+        return String.fromCharCode(55357, code);
+      }
+      let emojis = raw.match(/emoji\([0-9][0-9][0-9]\)/g);
+      if (emojis) {
+        for (let emoji of emojis) {
+          raw = raw.replace(emoji, code2emoji(Number(emoji.substring(6, 9))));
+        }
+      }
+
+      //公式支持
+      raw = raw.replace(
+        /<eqa>/g,
+        '<img src="http://latex.codecogs.com/gif.latex?'
+      );
+      raw = raw.replace(/<\/eqa>/g, '" />');
+
+      //再匹配markdown和代码块
+      let len = raw.length;
+      if (
+        raw.substring(0, 9) === "<my-code>" &&
+        raw.substring(len - 10, len) === "</my-code>"
+      ) {
+        return (
+          '<pre style="text-align:left">' +
+          raw.substring(9, len - 10) +
+          "</pre>"
+        );
+      } else if (
+        raw.substring(0, 10) === "<markdown>" &&
+        raw.substring(len - 11, len) === "</markdown>"
+      ) {
+        raw = raw.substring(10, len - 11);
+        const converter = new showdown.Converter({
+          extensions: [
+            showdownKatex({
+              // maybe you want katex to throwOnError
+              throwOnError: true,
+              // disable displayMode
+              displayMode: false,
+              // change errorColor to blue
+              errorColor: "#1500ff",
+              delimiters: [{ left: "$", right: "$" }],
+            }),
+          ],
+        });
+        let html = converter.makeHtml(raw);
+        return html;
+      }
+
+      return raw;
+    },
   },
   computed: {
     page_button1() {
@@ -553,9 +665,9 @@ a {
   color: #42b983;
 }
 
- nav > ul > div > li {
+nav > ul > div > li {
   margin: 0 0;
-  width:40px;
+  width: 40px;
   font-weight: bold;
 }
 </style>

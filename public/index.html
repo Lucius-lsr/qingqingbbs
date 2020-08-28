@@ -27,6 +27,12 @@
 		<!-- Main Page-->
 		<link rel="stylesheet" type="text/css" href="css/main.css" />
 
+		<!--katex-->
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/katex@0.10.0/dist/katex.min.css"
+		/>
+
 		<!--Fontawesome CDN-->
 		<link
 			rel="stylesheet"
@@ -57,19 +63,17 @@
 		/>
 
 		<style>
-			div{
+			div {
 				border-radius: 0.8em;
 			}
-			body{
+			body {
 				min-height: 100vh;
-				background-image:url("http://img.netbian.com/file/20110327/fc9a6fb5ce82e1c109470f08510bfbe1.jpg");
+				background-image: url('http://img.netbian.com/file/20110327/fc9a6fb5ce82e1c109470f08510bfbe1.jpg');
 				background-position: center;
-				background-repeat:no-repeat;
+				background-repeat: no-repeat;
 				background-size: contain;
-				
 			}
 		</style>
-
 
 		<title><%= htmlWebpackPlugin.options.title %></title>
 	</head>

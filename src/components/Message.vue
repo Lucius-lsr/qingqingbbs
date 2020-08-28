@@ -70,7 +70,6 @@
         <p class="text-muted" style="margin-top:-20px; margin-left:-20em">
           <small>单击查看详情>></small>
         </p>
-        <!-- <p>{{content}}</p> -->
         <div v-html="diy_content(content)" style="overflow:auto;width:370px;"></div>
       </div>
 
@@ -80,7 +79,7 @@
         <div
           v-for="reply in syn_replyList"
           :key="reply.id"
-          style="width: 500px; height:100px; background-color:white !important; overflow:auto; margin-bottom:10px "
+          style="width: 90%; height:100px; background-color:white !important; overflow:auto; margin-bottom:10px "
         >
           <div class="card-body">
             <div
@@ -98,11 +97,10 @@
                 </small>
               </p>
             </div>
-            <!-- <p class="card-text" style="margin-left:6em">{{reply.content}}</p> -->
 
             <div
               v-html="diy_content(reply.content)"
-              style="overflow:auto;width:400px;margin-left:100px"
+              style="overflow:auto;width:80%;margin-left:100px"
             ></div>
           </div>
         </div>
@@ -209,8 +207,15 @@
                 </div>
               </div>
 
-              <div v-if="format_raw" style="overflow:auto; height:600px">{{content}}</div>
-              <div v-else v-html="diy_content(content)" style="overflow:auto; height:600px"></div>
+              <div
+                v-if="format_raw"
+                style="overflow:auto; height:600px;background-color: #eee;"
+              >{{content}}</div>
+              <div
+                v-else
+                v-html="diy_content(content)"
+                style="overflow:auto; height:600px; background-color: #eee;"
+              ></div>
             </div>
             <div
               style="grid-row-start:1;grid-column-start:2;grid-row-end:3;grid-column-end:3; overflow:auto;"
@@ -256,12 +261,6 @@
                     @click="edit_mine(reply.content, reply.id)"
                     v-bind:title="'修改回复'"
                   ></a>
-                  <!-- <button
-                    class="btn btn-primary fa fa-reply"
-                    aria-hidden="true"
-                    style="height:25px; width:20px;margin:5px"
-                    @click="()=>{reply_name_content=reply.nickname+'('+reply.content+')';reply_id=reply.id}"
-                  ></button>-->
                 </div>
 
                 <div
@@ -363,19 +362,28 @@
                     </a>
                   </li>
                 </ul>
-                <button
-                  v-if="type==='reply'"
-                  type="button"
-                  class="btn btn-primary"
-                  @click="send_reply"
-                >回复</button>
-                <button
-                  v-else-if="type==='edit_post'"
-                  type="button"
-                  class="btn btn-primary"
-                  @click="send_edit_post"
-                >修改</button>
-                <button v-else type="button" class="btn btn-primary" @click="send_edit">修改</button>
+                <div style="display: -webkit-flex;dispaly:flex-inline">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-toggle="modal"
+                    :data-target="'#previewModal'+id"
+                    style="margin-right:10px"
+                  >预览</button>
+                  <button
+                    v-if="type==='reply'"
+                    type="button"
+                    class="btn btn-primary"
+                    @click="send_reply"
+                  >回复</button>
+                  <button
+                    v-else-if="type==='edit_post'"
+                    type="button"
+                    class="btn btn-primary"
+                    @click="send_edit_post"
+                  >修改</button>
+                  <button v-else type="button" class="btn btn-primary" @click="send_edit">修改</button>
+                </div>
               </div>
               <textarea
                 v-if="type==='reply'"
@@ -426,6 +434,29 @@
         </div>
       </div>
     </div>
+
+    <!-- preview modal -->
+    <div
+      class="modal fade"
+      :id="'previewModal'+id"
+      tabindex="-1"
+      aria-labelledby="previewModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body">
+            <div v-if="type==='reply'" v-html="diy_content(reply_content)" style="overflow:hidden"></div>
+            <div
+              v-else-if="type==='edit_post'"
+              v-html="diy_content(editing_content)"
+              style="overflow:hidden"
+            ></div>
+            <div v-else v-html="diy_content(editOri)" style="overflow:hidden"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -433,6 +464,7 @@
 <script>
 import axios from "axios";
 import showdown from "showdown";
+import showdownKatex from "showdown-katex";
 
 export default {
   name: "Message",
@@ -649,26 +681,30 @@ export default {
     },
     diy_content(raw) {
       // 先找自定义表情
-      raw = raw.replace(
-        /#img草泥马#/g,
-        '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/7a/shenshou_thumb.gif">'
-      );
-      raw = raw.replace(
-        /#img神马#/g,
-        '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/60/horse2_thumb.gif">'
-      );
-      raw = raw.replace(
-        /#img熊猫#/g,
-        '<img src="http://img.t.sinajs.cn/t35/style/images/common/face/ext/normal/6e/panda_thumb.gif">'
-      );
+      function code2emoji(code) {
+        // the code should within the range of [0,400]
+        if (code < 317) {
+          code = 56320 + code;
+        } else {
+          code = code - 317 + 56832;
+        }
+        return String.fromCharCode(55357, code);
+      }
+      let emojis = raw.match(/emoji\([0-9][0-9][0-9]\)/g);
+      if (emojis) {
+        for (let emoji of emojis) {
+          raw = raw.replace(emoji, code2emoji(Number(emoji.substring(6, 9))));
+        }
+      }
 
       //公式支持
-      console.log(raw)
-      raw = raw.replace(/<eqa>/g,'<img src="http://latex.codecogs.com/gif.latex?');
-      console.log(raw)
-      raw = raw.replace(/<\/eqa>/g,'" />');
+      raw = raw.replace(
+        /<eqa>/g,
+        '<img src="http://latex.codecogs.com/gif.latex?'
+      );
+      raw = raw.replace(/<\/eqa>/g, '" />');
 
-      //再匹配特殊文本
+      //再匹配markdown和代码块
       let len = raw.length;
       if (
         raw.substring(0, 9) === "<my-code>" &&
@@ -683,7 +719,20 @@ export default {
         raw.substring(0, 10) === "<markdown>" &&
         raw.substring(len - 11, len) === "</markdown>"
       ) {
-        let converter = new showdown.Converter();
+        raw = raw.substring(10, len - 11);
+        const converter = new showdown.Converter({
+          extensions: [
+            showdownKatex({
+              // maybe you want katex to throwOnError
+              throwOnError: true,
+              // disable displayMode
+              displayMode: false,
+              // change errorColor to blue
+              errorColor: "#1500ff",
+              delimiters: [{ left: "$", right: "$" }],
+            }),
+          ],
+        });
         let html = converter.makeHtml(raw);
         return html;
       }
