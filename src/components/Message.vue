@@ -194,18 +194,29 @@
                     @click="()=>{host_only=!host_only}"
                     v-bind:title="'只看楼主'"
                   ></a>
-
-                  <a
-                    href="#"
-                    v-if="admin_id===userId"
-                    class="fa fa-pencil"
-                    aria-hidden="true"
-                    style="font-size: 30px; color:rgb(0, 150, 136)"
-                    @click="edit_my_post()"
-                    v-bind:title="'修改原帖'"
-                  ></a>
                 </div>
               </div>
+<div style="position:absolute">
+              <a
+                href="#"
+                v-if="admin_id===userId"
+                class="fa fa-pencil"
+                aria-hidden="true"
+                style="font-size: 30px; color:rgb(0, 150, 136);margin-left:20px"
+                @click="edit_my_post()"
+                v-bind:title="'修改原帖'"
+              ></a>
+
+              <a
+                href="#"
+                v-if="content.indexOf('img')!==-1"
+                class="fa fa-file-image-o"
+                aria-hidden="true"
+                style="font-size: 30px; color:rgb(0, 150, 136);margin-left:20px"
+                data-toggle="modal"
+                :data-target="'#previewImage'+id"
+                v-bind:title="'查看原图'"
+              ></a></div>
 
               <div
                 v-if="format_raw"
@@ -216,6 +227,22 @@
                 v-html="diy_content(content)"
                 style="overflow:auto; height:600px; background-color: #eee;"
               ></div>
+              <div
+                v-if="content.indexOf('img')!==-1"
+                class="modal fade"
+                :id="'previewImage'+id"
+                tabindex="-1"
+                aria-labelledby="previewModalLabel"
+                aria-hidden="true"
+              >
+                <div class="modal-lg modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-body">
+                      <div v-html="diy_content(content)" style="overflow:hidden"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div
               style="grid-row-start:1;grid-column-start:2;grid-row-end:3;grid-column-end:3; overflow:auto;"
@@ -257,9 +284,20 @@
                     v-if="admin_id===reply.userId"
                     class="fa fa-pencil"
                     aria-hidden="true"
-                    style="font-size: 15px; color:rgb(0, 150, 136)"
+                    style="font-size: 15px; color:rgb(0, 150, 136);margin-left:10px"
                     @click="edit_mine(reply.content, reply.id)"
                     v-bind:title="'修改回复'"
+                  ></a>
+
+                  <a
+                    href="#"
+                    v-if="reply.content.indexOf('img')!==-1"
+                    class="fa fa-file-image-o"
+                    aria-hidden="true"
+                    style="font-size: 15px; color:rgb(0, 150, 136);margin-left:10px"
+                    data-toggle="modal"
+                    :data-target="'#previewImage'+reply.id"
+                    v-bind:title="'查看原图'"
                   ></a>
                 </div>
 
@@ -274,6 +312,22 @@
                       v-html="diy_content(reply.content)"
                       style="overflow:auto;width:480px;"
                     ></div>
+                    <div
+                      v-if="content.indexOf('img')!==-1"
+                      class="modal fade"
+                      :id="'previewImage'+reply.id"
+                      tabindex="-1"
+                      aria-labelledby="previewModalLabel"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-lg modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-body">
+                            <div v-html="diy_content(reply.content)" style="overflow:hidden"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div
@@ -304,13 +358,40 @@
                           v-if="admin_id===replyreply.userId"
                           class="fa fa-pencil"
                           aria-hidden="true"
-                          style="font-size: 15px; color:rgb(0, 150, 136)"
+                          style="font-size: 15px; color:rgb(0, 150, 136);margin-left:10px"
                           @click="edit_mine(replyreply.content, replyreply.id)"
                           v-bind:title="'修改回复'"
+                        ></a>
+
+                        <a
+                          href="#"
+                          v-if="replyreply.content.indexOf('img')!==-1"
+                          class="fa fa-file-image-o"
+                          aria-hidden="true"
+                          style="font-size: 15px; color:rgb(0, 150, 136);margin-left:10px"
+                          data-toggle="modal"
+                          :data-target="'#previewImage'+replyreply.id"
+                          v-bind:title="'查看原图'"
                         ></a>
                       </div>
                       <div v-if="format_raw" style="overflow:auto;">{{replyreply.content}}</div>
                       <div v-else v-html="diy_content(replyreply.content)" style="overflow:auto;"></div>
+                      <div
+                        v-if="content.indexOf('img')!==-1"
+                        class="modal fade"
+                        :id="'previewImage'+replyreply.id"
+                        tabindex="-1"
+                        aria-labelledby="previewModalLabel"
+                        aria-hidden="true"
+                      >
+                        <div class="modal-lg modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-body">
+                              <div v-html="diy_content(replyreply.content)" style="overflow:hidden"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -704,6 +785,9 @@ export default {
       );
       raw = raw.replace(/<\/eqa>/g, '" />');
 
+      const hljs = require("highlight.js");
+      // const highlightedCode = hljs.highlightAuto('<span>Hello World!</span>').value
+
       //再匹配markdown和代码块
       let len = raw.length;
       if (
@@ -712,7 +796,7 @@ export default {
       ) {
         return (
           '<pre style="text-align:left">' +
-          raw.substring(9, len - 10) +
+          hljs.highlightAuto(raw.substring(9, len - 10)).value +
           "</pre>"
         );
       } else if (
@@ -779,9 +863,7 @@ export default {
 
       all_historys = all_historys.split(",");
 
-      if (all_historys.indexOf("" + post_id) == -1) {
-        all_historys.unshift(post_id);
-      }
+      all_historys.unshift(post_id);
 
       if (all_historys.length > 30) {
         all_historys.pop();
@@ -823,3 +905,17 @@ export default {
 };
 </script>
 
+
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style>
+.modal img,
+.collapse img {
+  max-width: 400px;
+  max-height: 600px;
+}
+.modal-lg img {
+  max-width: none;
+  max-height: none;
+}
+</style>

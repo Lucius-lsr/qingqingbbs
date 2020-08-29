@@ -316,6 +316,7 @@
         </div>
       </div>
     </div>
+    <div v-if="loading" id="loading" class="loading">正在加载...</div>
   </div>
 </template>
 
@@ -348,6 +349,7 @@ export default {
       show_umb: false,
       search_target: "",
       search_results: [],
+      loading:false,
     };
   },
   methods: {
@@ -421,87 +423,20 @@ export default {
         });
     },
     show_star() {
-      let acookie = document.cookie.split("; ");
-      let all_stars = "";
-      for (var i = 0; i < acookie.length; i++) {
-        var arr = acookie[i].split("=");
-        if (arr[0] === "star") {
-          all_stars = arr[1];
-        }
-      }
-
-      all_stars = all_stars.split(",");
-
-      let star_posts = [];
-
-      axios.defaults.headers.common["Authorization"] = this.token;
-      axios
-        .get("/api/v1/post", {
-          params: {
-            size: 1000,
-          },
-        })
-        .then((res) => {
-          for (let _star of all_stars) {
-            for (let mes of res.data["posts"]) {
-              if (mes.id == _star) {
-                star_posts.push(mes);
-              }
-            }
-          }
-          this.show_umb = false;
-          this.displayed_message = star_posts;
-        })
-        .catch(() => {
-          /* eslint-disable */
-          toastr.warning("服务器有问题");
-          /* eslint-enable */
-        });
+      this.show_("star");
     },
     show_history() {
-      let acookie = document.cookie.split("; ");
-      let all_historys = "";
-      for (var i = 0; i < acookie.length; i++) {
-        var arr = acookie[i].split("=");
-        if (arr[0] === "history") {
-          all_historys = arr[1];
-        }
-      }
-
-      all_historys = all_historys.split(",");
-
-      let history_posts = [];
-
-      axios.defaults.headers.common["Authorization"] = this.token;
-      axios
-        .get("/api/v1/post", {
-          params: {
-            size: 1000,
-          },
-        })
-        .then((res) => {
-          for (let _history of all_historys) {
-            for (let mes of res.data["posts"]) {
-              if (mes.id == _history) {
-                history_posts.push(mes);
-              }
-            }
-          }
-          this.show_umb = false;
-          this.displayed_message = history_posts;
-        })
-        .catch(() => {
-          /* eslint-disable */
-          toastr.warning("服务器有问题");
-          /* eslint-enable */
-        });
+      this.show_("history");
     },
     show_umbrella() {
+      this.show_("umbrella");
+    },
+    show_(toShow) {
       let acookie = document.cookie.split("; ");
       let all_umbrellas = "";
       for (var i = 0; i < acookie.length; i++) {
         var arr = acookie[i].split("=");
-        if (arr[0] === "umbrella") {
+        if (arr[0] === toShow) {
           all_umbrellas = arr[1];
         }
       }
@@ -510,11 +445,13 @@ export default {
 
       let umbrella_posts = [];
 
+      this.loading=true
+
       axios.defaults.headers.common["Authorization"] = this.token;
       axios
         .get("/api/v1/post", {
           params: {
-            size: 1000,
+            size: 3000,
           },
         })
         .then((res) => {
@@ -527,8 +464,10 @@ export default {
           }
           this.show_umb = true;
           this.displayed_message = umbrella_posts;
+          this.loading=false
         })
         .catch(() => {
+          this.loading=false
           /* eslint-disable */
           toastr.warning("服务器有问题");
           /* eslint-enable */
@@ -578,6 +517,9 @@ export default {
       );
       raw = raw.replace(/<\/eqa>/g, '" />');
 
+      const hljs = require("highlight.js");
+      // const highlightedCode = hljs.highlightAuto('<span>Hello World!</span>').value
+
       //再匹配markdown和代码块
       let len = raw.length;
       if (
@@ -586,7 +528,7 @@ export default {
       ) {
         return (
           '<pre style="text-align:left">' +
-          raw.substring(9, len - 10) +
+          hljs.highlightAuto(raw.substring(9, len - 10)).value +
           "</pre>"
         );
       } else if (
@@ -669,5 +611,24 @@ nav > ul > div > li {
   margin: 0 0;
   width: 40px;
   font-weight: bold;
+}
+
+.loading{
+	width:160px;
+	height:56px;
+	position: absolute;
+	top:30%;
+	left:50%;
+	line-height:56px;
+	color:#fff;
+	padding-left:60px;
+	font-size:15px;
+	background: #000 url(https://img-my.csdn.net/uploads/201211/14/1352886927_7549.gif) no-repeat 10px 50%;
+	opacity: 0.7;
+	z-index:9999;
+	-moz-border-radius:20px;
+	-webkit-border-radius:20px;
+	border-radius:20px;
+	filter:progid:DXImageTransform.Microsoft.Alpha(opacity=70);
 }
 </style>
