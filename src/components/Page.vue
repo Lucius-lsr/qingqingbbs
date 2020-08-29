@@ -354,6 +354,7 @@ export default {
   },
   methods: {
     get_message() {
+      this.loading=true
       axios.defaults.headers.common["Authorization"] = this.token;
       axios
         .get("/api/v1/post", {
@@ -370,10 +371,12 @@ export default {
           },
         })
         .then((res) => {
+          this.loading=false
           this.displayed_message = res.data["posts"];
         })
         .catch(() => {
           /* eslint-disable */
+          this.loading=false
           toastr.warning("服务器有问题");
           /* eslint-enable */
         });
